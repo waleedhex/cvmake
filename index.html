@@ -1,0 +1,1311 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>منشئ السيرة — قوالب + تايم لاين + صفحتين</title>
+
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&family=IBM+Plex+Sans+Arabic:wght@400;700&family=Noto+Kufi+Arabic:wght@400;700;900&family=Tajawal:wght@400;700;900&display=swap" rel="stylesheet">
+<!-- Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" referrerpolicy="no-referrer"/>
+
+<style>
+  #printBtn {
+  display: none !important;
+}
+
+  :root{
+    --text:#111111; --heading:#0f172a;
+    --aside-grad-a:#0f172a; --aside-grad-b:#1d4ed8; --aside-angle:180deg;
+    --divider:#e5e7eb; --divider-w:1px;
+    --base-font:14px; --name-font:28px; --h-font:15px;
+    --font-body:"Noto Kufi Arabic","Cairo","Tajawal","IBM Plex Sans Arabic",system-ui,-apple-system,"Segoe UI",Roboto,Tahoma,sans-serif;
+    --font-head:"Cairo","Tajawal","Noto Kufi Arabic","IBM Plex Sans Arabic",system-ui,-apple-system,"Segoe UI",Roboto,Tahoma,sans-serif;
+    --font-name:"Tajawal","Cairo","Noto Kufi Arabic","IBM Plex Sans Arabic",system-ui,-apple-system,"Segoe UI",Roboto,Tahoma,sans-serif;
+
+    --grid-min:180px; --card-min-h:84px; --card-pad:12px; --section-gap:18px;
+    --aside-w:280px; /* عرض العمود الجانبي */
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:#0b1020; color:#e5e7eb; font-family:var(--font-body);
+    min-height:100vh; display:grid; grid-template-columns: 390px 1fr;
+  }
+  @media (max-width:1100px){ body{grid-template-columns:1fr} }
+
+  /* لوحة التحكم (تمرير مستقل) */
+  .controls{
+    background:#0f172a; border-inline-end:1px solid #1f2937; padding:10px;
+    overflow-y:auto;      /* ✅ تمرير عمودي مستقل */
+    height:100vh;         /* ✅ يملأ ارتفاع الشاشة */
+    position:sticky; top:0;
+  }
+  details{border:1px solid #1f2937; border-radius:12px; margin:8px 0; background:#0b1222}
+  summary{cursor:pointer; padding:12px 14px; font-weight:800; list-style:none}
+  summary::-webkit-details-marker{display:none}
+  .group{padding:0 12px 12px}
+  .field{display:flex; flex-direction:column; gap:6px; margin:10px 0}
+  .stack{display:flex; gap:8px; flex-wrap:wrap; align-items:center}
+  label.small{font-size:13px; opacity:.9}
+  input[type="text"],input[type="number"],input[type="file"],textarea,select{
+    width:100%; background:#0b1529; color:#e5e7eb; border:1px solid #1f2937; border-radius:10px; padding:8px 10px; outline:none
+  }
+  textarea{min-height:70px}
+  .btn{background:#22c55e; color:#052e16; border:none; padding:8px 12px; border-radius:10px; font-weight:800; cursor:pointer}
+  .btn.ghost{background:transparent; border:1px solid #1f2937; color:#cfe3ff}
+  .btn.dan{background:#ef4444; color:#2b0b0b}
+  .list{display:flex; flex-direction:column; gap:8px}
+  .chip{display:flex; justify-content:space-between; align-items:center; gap:8px; background:#0b1529; border:1px solid #1f2937; padding:8px 10px; border-radius:10px}
+  .toolbar{position:sticky; bottom:0; background:#0f172a; padding:8px; border-top:1px solid #1f2937; z-index:2}
+
+  /* المعاينة */
+  .preview{padding:16px; display:flex; justify-content:center; align-items:flex-start; overflow:auto}
+  .a4{
+    width:794px; min-height:1123px; background:#fff; color:var(--text);
+    border-radius:12px; box-shadow:0 20px 60px rgba(0,0,0,.45); overflow:hidden; position:relative
+  }
+
+  /* ✅ امتداد الشريط الجانبي لأسفل الصفحة */
+  .cv{
+    display:grid; grid-template-columns: var(--aside-w) var(--divider-w) 1fr;
+    min-height:100vh; /* يغطي ارتفاع الشاشة */
+    height:100%;
+    font-size:var(--base-font)
+  }
+  .cv.onecol{grid-template-columns: 1fr} /* وضع عمود واحد */
+
+  .aside{
+    background:linear-gradient(var(--aside-angle), var(--aside-grad-a) 0%, var(--aside-grad-b) 100%);
+    color:#eef2ff; padding:22px; display:flex; flex-direction:column; gap:16px;
+    height:100%; /* يغطي العمود بالكامل */
+  }
+
+  .divider{background:var(--divider)}
+  .main{padding:24px 28px; display:flex; flex-direction:column; gap:var(--section-gap)}
+
+  .row-top{display:flex; align-items:center; gap:12px}
+  .avatar{width:96px; height:96px; min-width:96px; min-height:96px; border-radius:50%; background:conic-gradient(#4f46e5,#22c55e,#06b6d4,#4f46e5); padding:3px; flex:0 0 auto}
+  .avatar > img{width:100%; height:100%; border-radius:50%; object-fit:cover; display:block; background:#0b1222}
+  .title-box{min-width:0; flex:1 1 auto}
+  .name{font-weight:900; line-height:1.2; font-size:var(--name-font); color:#fff; word-break:break-word; font-family:var(--font-name)}
+  .role{opacity:.95; margin-top:4px; color:#e2e8f0; font-family:var(--font-head)}
+
+  .section{display:flex; flex-direction:column; gap:8px}
+  .section h3{margin:0; color:var(--heading); font-size:var(--h-font); font-family:var(--font-head)}
+  .tag{display:inline-flex; align-items:center; gap:8px; padding:6px 10px; border-radius:999px; background:#eef2ff; color:#1f2937; font-weight:800; font-size:12px}
+  .kv{display:grid; grid-template-columns:auto 1fr; gap:6px 10px; font-size:calc(var(--base-font)*.95)}
+  .summary{background:#f8fafc; border:1px solid #e5e7eb; padding:12px; border-radius:12px}
+
+  .wrap, .summary, .kv div, .skill .label, .exp .title, .exp .desc, .card .title{overflow-wrap:anywhere; word-break:break-word; white-space:normal}
+
+  /* مهارات */
+  .skill-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(var(--grid-min),1fr)); gap:14px; align-items:start}
+  .skill{background:#fff; border-radius:14px; padding:var(--card-pad); box-shadow:0 4px 18px rgba(2,6,23,.08); display:flex; align-items:center; gap:12px; min-height:var(--card-min-h)}
+  .skill .label{font-weight:800; font-size:13px; color:#0f172a; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+  .skill .sub{font-size:11px; color:#6b7280}
+  .skill.soft{min-height:auto}
+  .skill.soft .bullet{flex:0 0 auto; width:28px; height:28px; border-radius:50%; background:#eef2ff; display:flex; align-items:center; justify-content:center; font-weight:900; color:#1f2937}
+
+  /* Gauges SVG */
+  .gauge{width:60px; height:60px; flex:0 0 auto; display:inline-block}
+  .gauge svg{width:60px; height:60px; display:block}
+  .g-bg{stroke:#e5e7eb}
+  .g-ring{transform: rotate(-90deg); transform-origin: 50% 50%}
+  .g-center{font-size:12px; font-weight:800; fill:#111; dominant-baseline:middle; text-anchor:middle}
+
+  /* Bars */
+  .bar{width:110px; height:10px; background:#e5e7eb; border-radius:999px; overflow:hidden; position:relative; flex:0 0 auto}
+  .bar > span{display:block; height:100%; width:0; background:#2563eb}
+
+  /* Stars */
+  .stars{flex:0 0 auto; width:110px; display:flex; gap:4px; color:#f59e0b}
+  .stars i{font-size:16px}
+
+  /* تعليم/شهادات */
+  .edu,.cert{display:grid; grid-template-columns:1fr auto; gap:6px; padding:8px 0; border-bottom:1px dashed #e5e7eb}
+  .edu:last-child,.cert:last-child{border-bottom:none}
+  .small{font-size:12px; color:#6b7280}
+  .cards{display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:12px}
+  .card{background:#fff; border:1px solid #e5e7eb; border-radius:12px; padding:12px}
+  .card .title{font-weight:800; margin-bottom:4px}
+
+  /* الخبرات — تايم لاين */
+  .exp-list{display:flex; flex-direction:column; gap:10px}
+  .exp{background:#fff; border:1px solid #e5e7eb; border-radius:12px; padding:12px}
+  .exp .header{display:flex; justify-content:space-between; gap:8px; align-items:flex-start}
+  .exp .title{font-weight:800}
+  .exp .company{color:#1f2937}
+  .exp .period{font-size:12px; color:#6b7280}
+  .exp .desc{font-size:var(--base-font); color:var(--text); margin-top:6px; white-space:pre-wrap}
+
+  .timeline{position:relative; padding-inline-start:16px}
+  .timeline::before{content:""; position:absolute; top:0; bottom:0; inset-inline-start:6px; width:2px; background:#e5e7eb}
+  .t-item{position:relative; background:#fff; border:1px solid #e5e7eb; border-radius:12px; padding:12px; margin:12px 0}
+  .t-item::before{content:""; position:absolute; width:12px; height:12px; border-radius:50%; background:#1d4ed8; inset-inline-start:-1px; top:14px; border:2px solid #fff; box-shadow:0 0 0 2px #e5e7eb}
+
+  .footer{position:absolute; bottom:0; left:0; right:0; padding:8px 12px; font-size:10px; color:#64748b; background:#f8fafc; border-top:1px solid #e5e7eb}
+  .hidden{display:none !important}
+
+  /* أحجام الخط */
+  .cv h3{font-size:var(--h-font)}
+  .cv .name{font-size:var(--name-font)}
+  .cv, .cv .text, .cv .summary{color:var(--text)}
+  .cv h3, .tag{color:var(--heading)}
+
+  /* ✅ تحسين العرض على الجوال ليظهر كأنها PDF */
+  @media (max-width: 768px){
+    .cv{ grid-template-columns:1fr; }
+    .divider{ display:none; }
+    .a4{
+      width:100%;
+      min-height:auto;
+      border-radius:0;
+      box-shadow:none;
+    }
+    .preview{ padding:0; }
+    .main{ padding:18px 16px; }
+    .aside{ padding:18px 16px; }
+  }
+
+  /* طباعة */
+  @media print{
+    body{background:#fff; padding:0}
+    .controls{display:none !important}
+    .a4{box-shadow:none; border-radius:0; width:210mm}
+    .footer{display:none}
+  }
+
+  /* ✅ نافذة الدفع غير المعيقة */
+  .modal{
+    position:fixed; inset:0;
+    background:rgba(0,0,0,0.6);
+    display:flex; justify-content:center; align-items:center;
+    z-index:9999;
+  }
+  .modal.hidden{display:none}
+  .modal-content{
+    background:#fff; color:#111;
+    padding:24px; border-radius:12px;
+    max-width:420px; width:92%;
+    text-align:center;
+    box-shadow:0 10px 30px rgba(0,0,0,0.4);
+    line-height:1.7;
+  }
+  .modal-actions{
+    display:flex; justify-content:space-around; gap:10px; margin-top:18px;
+  }
+</style>
+</head>
+<body>
+  <!-- لوحة التحكم -->
+  <aside class="controls">
+    <details open>
+      <summary>القوالب & اللغة & الأعمدة</summary>
+      <div class="group">
+        <div class="field">
+          <label class="small">اختيار قالب</label>
+          <select id="templatePick">
+            <option value="classic" selected>Classic (أزرق)</option>
+            <option value="emerald">Emerald (أخضر)</option>
+            <option value="royal">Royal (بنفسجي)</option>
+            <option value="mono">Monochrome (رمادي)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="small">اللغة / الاتجاه</label>
+          <div class="stack">
+            <select id="langDir">
+              <option value="rtl" selected>عربي (RTL)</option>
+              <option value="ltr">English (LTR)</option>
+            </select>
+          </div>
+        </div>
+        <div class="field">
+          <label class="small">الأعمدة</label>
+          <div class="stack">
+            <select id="colMode">
+              <option value="two" selected>عمودان</option>
+              <option value="one">عمود واحد</option>
+            </select>
+            <span>عرض الجانب</span><input id="asideW" type="range" min="220" max="360" value="280"><span id="asideW_v">280px</span>
+          </div>
+        </div>
+      </div>
+    </details>
+
+    <details open>
+      <summary>إظهار/إخفاء الأقسام</summary>
+      <div class="group">
+        <div class="field"><label class="small"><input type="checkbox" id="v_photo" checked> الصورة</label></div>
+        <div class="field"><label class="small"><input type="checkbox" id="v_headline" checked> العنوان المختصر</label></div>
+        <div class="field"><label class="small"><input type="checkbox" id="v_contact" checked> بيانات التواصل</label></div>
+        <div class="field"><label class="small"><input type="checkbox" id="v_summary" checked> الملخص</label></div>
+        <div class="field"><label class="small"><input type="checkbox" id="v_skills" checked> المهارات</label></div>
+        <div class="field"><label class="small"><input type="checkbox" id="v_experience" checked> الخبرات</label></div>
+        <div class="field"><label class="small"><input type="checkbox" id="v_edu" checked> التعليم</label></div>
+        <div class="field"><label class="small"><input type="checkbox" id="v_certs" checked> الشهادات</label></div>
+        <div class="field"><label class="small"><input type="checkbox" id="v_hobbies" checked> الهوايات</label></div>
+        <div class="field"><label class="small"><input type="checkbox" id="v_extras" checked> الحقول الإضافية</label></div>
+
+        <hr style="border:none;border-top:1px solid #1f2937; margin:10px 0">
+        <div class="field"><label class="small"><input type="checkbox" id="t_hobbies" checked> إظهار عنوان قسم الهوايات</label></div>
+        <div class="field"><label class="small"><input type="checkbox" id="t_skills" checked> إظهار عنوان قسم المهارات</label></div>
+        <div class="field"><label class="small"><input type="checkbox" id="t_extras" checked> إظهار عنوان قسم البيانات الإضافية</label></div>
+      </div>
+    </details>
+
+    <details>
+      <summary>البيانات الأساسية</summary>
+      <div class="group">
+        <div class="field"><label>الاسم<input type="text" id="name" placeholder="مثال: وليد بن خالد"></label></div>
+        <div class="field"><label>العنوان المختصر<input type="text" id="headline" placeholder="مثال: خدمة عملاء | باحث عن عمل"></label></div>
+        <div class="field"><label class="small">الصورة<input type="file" id="photo" accept="image/*"></label></div>
+        <div class="field"><label>الموقع<input type="text" id="location" placeholder="الرياض، السعودية"></label></div>
+        <div class="field"><label>الهاتف<input type="text" id="phone" placeholder="05xxxxxxxx"></label></div>
+        <div class="field"><label>البريد<input type="text" id="email" placeholder="you@example.com"></label></div>
+        <div class="field"><label>الملخص</label><textarea id="summary" placeholder="نبذة قصيرة تبرز نقاط قوتك..."></textarea></div>
+      </div>
+    </details>
+
+    <details>
+      <summary>المهارات</summary>
+      <div class="group">
+        <div class="field">
+          <div class="stack">
+            <input id="skill-name" placeholder="مثال: اللباقة / إنجليزي / وورد">
+            <input id="skill-level" type="number" min="0" max="100" placeholder="% (اختياري)" style="max-width:120px">
+            <input id="skill-color" type="color" value="#2563eb" title="لون">
+            <label class="small"><input id="skill-soft" type="checkbox"> مهارة بدون نسبة</label>
+            <button class="btn" id="addSkill">إضافة</button>
+          </div>
+        </div>
+        <div class="field">
+          <label class="small">طريقة عرض المهارات</label>
+          <select id="skillsLayout">
+            <option value="gauge" selected>دوائر (SVG)</option>
+            <option value="bar">أشرطة</option>
+            <option value="stars">نجوم</option>
+          </select>
+        </div>
+        <div class="list" id="skillList"></div>
+      </div>
+    </details>
+
+    <details>
+      <summary>الخبرات العملية</summary>
+      <div class="group">
+        <div class="field">
+          <div class="stack">
+            <input id="exp-role" placeholder="المسمّى الوظيفي">
+            <input id="exp-company" placeholder="الجهة">
+            <input id="exp-start" placeholder="بداية (YYYY-MM)">
+            <input id="exp-end" placeholder="نهاية (أو حتى الآن)">
+            <button class="btn" id="addExp">إضافة</button>
+          </div>
+        </div>
+        <div class="field">
+          <label>الوصف / المنجزات</label>
+          <textarea id="exp-desc" placeholder="سرد إنجازاتك ونطاق عملك (اختياري)"></textarea>
+        </div>
+        <div class="field">
+          <label class="small">طريقة عرض الخبرات</label>
+          <select id="expLayout">
+            <option value="cards" selected>كروت</option>
+            <option value="timeline">تايم لاين رأسي</option>
+          </select>
+        </div>
+        <div class="list" id="expList"></div>
+      </div>
+    </details>
+
+    <details>
+      <summary>التعليم والشهادات</summary>
+      <div class="group">
+        <h4 style="margin:0 0 6px">التعليم</h4>
+        <div class="field">
+          <div class="stack">
+            <input id="edu-title" placeholder="المؤهل (الثانوية العامة)">
+            <input id="edu-school" placeholder="المدرسة">
+            <input id="edu-year" placeholder="سنة التخرج" style="max-width:120px">
+            <button class="btn" id="addEdu">إضافة</button>
+          </div>
+        </div>
+        <div class="field">
+          <label class="small">عرض التعليم</label>
+          <select id="eduLayout">
+            <option value="list" selected>قائمة</option>
+            <option value="cards">كروت</option>
+          </select>
+        </div>
+        <div class="list" id="eduList"></div>
+        <hr style="border:none;border-top:1px solid #1f2937; margin:10px 0">
+        <h4 style="margin:0 0 6px">الشهادات</h4>
+        <div class="field">
+          <div class="stack">
+            <input id="cert-title" placeholder="اسم الشهادة/الدورة">
+            <input id="cert-issuer" placeholder="الجهة">
+            <input id="cert-year" placeholder="السنة" style="max-width:120px">
+            <button class="btn" id="addCert">إضافة</button>
+          </div>
+        </div>
+        <div class="field">
+          <label class="small">عرض الشهادات</label>
+          <select id="certLayout">
+            <option value="list" selected>قائمة</option>
+            <option value="cards">كروت</option>
+          </select>
+        </div>
+        <div class="list" id="certList"></div>
+      </div>
+    </details>
+
+    <details>
+      <summary>الهوايات والحقول الإضافية</summary>
+      <div class="group">
+        <h4 style="margin:0 0 6px">الهوايات</h4>
+        <div class="field">
+          <div class="stack">
+            <input id="hobby-input" placeholder="مثال: قراءة — جيم — تصوير">
+            <button class="btn" id="addHobby">إضافة</button>
+          </div>
+        </div>
+        <div class="field">
+          <label class="small">عرض الهوايات</label>
+          <select id="hobbyLayout">
+            <option value="tags" selected>شارات</option>
+            <option value="list">قائمة</option>
+          </select>
+        </div>
+        <div class="list" id="hobbyList"></div>
+
+        <hr style="border:none;border-top:1px solid #1f2937; margin:10px 0">
+
+        <h4 style="margin:0 0 6px">حقول إضافية</h4>
+        <div class="field">
+          <div class="stack">
+            <input id="extra-label" placeholder="التسمية: رقم الهوية">
+            <input id="extra-value" placeholder="القيمة: 1234567890">
+            <select id="extra-where">
+              <option value="aside" selected>جانب</option>
+              <option value="main">رئيسي</option>
+            </select>
+            <button class="btn" id="addExtra">إضافة</button>
+          </div>
+        </div>
+        <div class="list" id="extraList"></div>
+      </div>
+    </details>
+
+    <details>
+      <summary>أماكن وترتيب الأقسام</summary>
+      <div class="group">
+        <div class="field">
+          <div class="stack">
+            <select id="place-skills"><option value="aside" selected>المهارات → الجانب</option><option value="main">المهارات → الرئيسي</option></select>
+            <select id="place-experience"><option value="main" selected>الخبرات → الرئيسي</option><option value="aside">الخبرات → الجانب</option></select>
+            <select id="place-hobbies"><option value="aside" selected>الهوايات → الجانب</option><option value="main">الهوايات → الرئيسي</option></select>
+            <select id="place-extras"><option value="aside" selected>البيانات الإضافية → الجانب</option><option value="main">البيانات الإضافية → الرئيسي</option></select>
+            <select id="place-edu"><option value="main" selected>التعليم → الرئيسي</option><option value="aside">التعليم → الجانب</option></select>
+            <select id="place-certs"><option value="main" selected>الشهادات → الرئيسي</option><option value="aside">الشهادات → الجانب</option></select>
+            <select id="place-summary"><option value="main" selected>الملخص → الرئيسي</option><option value="aside">الملخص → الجانب</option></select>
+          </div>
+        </div>
+        <div class="field">
+          <label class="small">ترتيب الجانب</label>
+          <div class="list" id="order-aside"></div>
+        </div>
+        <div class="field">
+          <label class="small">ترتيب الرئيسي</label>
+          <div class="list" id="order-main"></div>
+        </div>
+      </div>
+    </details>
+
+    <details>
+      <summary>التنسيق والأحجام</summary>
+      <div class="group">
+        <div class="field">
+          <label class="small">حجم الخط الأساسي / العناوين / الاسم</label>
+          <div class="stack">
+            <input id="baseSize" type="range" min="12" max="20" value="14"><span id="baseSize_v">14px</span>
+            <input id="hSize" type="range" min="13" max="26" value="15"><span id="hSize_v">15px</span>
+            <input id="nameSize" type="range" min="22" max="56" value="28"><span id="nameSize_v">28px</span>
+          </div>
+        </div>
+        <div class="field">
+          <label class="small">أبعاد الحاويات</label>
+          <div class="stack">
+            <span>عرض العمود</span><input id="gridMin" type="range" min="140" max="280" value="180"><span id="gridMin_v">180px</span>
+            <span>ارتفاع الكرت</span><input id="cardMinH" type="range" min="60" max="140" value="84"><span id="cardMinH_v">84px</span>
+            <span>الحشوة</span><input id="cardPad" type="range" min="8" max="24" value="12"><span id="cardPad_v">12px</span>
+            <span>فراغ الأقسام</span><input id="sectionGap" type="range" min="10" max="36" value="18"><span id="sectionGap_v">18px</span>
+          </div>
+        </div>
+        <div class="field">
+          <label class="small">ألوان النص/العناوين</label>
+          <div class="stack">
+            <span>النص</span><input id="colText" type="color" value="#111111">
+            <span>العناوين</span><input id="colHeading" type="color" value="#0f172a">
+          </div>
+        </div>
+        <div class="field">
+          <label class="small">الشريط الجانبي (تدرّج + زاوية)</label>
+          <div class="stack">
+            <span>من</span><input id="gradA" type="color" value="#0f172a">
+            <span>إلى</span><input id="gradB" type="color" value="#1d4ed8">
+            <span>زاوية</span><input id="gradAngle" type="range" min="0" max="360" value="180"><span id="gradAngle_v">180°</span>
+          </div>
+        </div>
+        <div class="field">
+          <label class="small">الفاصل</label>
+          <div class="stack">
+            <label class="small"><input id="dividerToggle" type="checkbox" checked> إظهار</label>
+            <span>اللون</span><input id="dividerColor" type="color" value="#e5e7eb">
+            <span>السُمك</span><input id="dividerW" type="range" min="0" max="6" value="1"><span id="dividerW_v">1px</span>
+          </div>
+        </div>
+        <div class="field">
+          <label class="small">الخطوط</label>
+          <div class="stack">
+            <select id="fontName">
+              <option value='"Tajawal","Cairo","Noto Kufi Arabic","IBM Plex Sans Arabic",system-ui,-apple-system,"Segoe UI",Roboto,Tahoma,sans-serif'>Tajawal (الاسم)</option>
+              <option value='"Cairo","Tajawal","Noto Kufi Arabic","IBM Plex Sans Arabic",system-ui,-apple-system,"Segoe UI",Roboto,Tahoma,sans-serif'>Cairo (الاسم)</option>
+              <option value='"Noto Kufi Arabic","Cairo","Tajawal","IBM Plex Sans Arabic",system-ui,-apple-system,"Segoe UI",Roboto,Tahoma,sans-serif'>Noto Kufi (الاسم)</option>
+              <option value='"IBM Plex Sans Arabic","Cairo","Tajawal","Noto Kufi Arabic",system-ui,-apple-system,"Segoe UI",Roboto,Tahoma,sans-serif'>IBM Plex (الاسم)</option>
+            </select>
+            <select id="fontHead">
+              <option value='"Cairo","Tajawal","Noto Kufi Arabic","IBM Plex Sans Arabic",system-ui,-apple-system,"Segoe UI",Roboto,Tahoma,sans-serif'>Cairo (العناوين)</option>
+              <option value='"Tajawal","Cairo","Noto Kufi Arabic","IBM Plex Sans Arabic",system-ui,-apple-system,"Segoe UI",Roboto,Tahoma,sans-serif'>Tajawal (العناوين)</option>
+              <option value='"Noto Kufi Arabic","Cairo","Tajawal","IBM Plex Sans Arabic",system-ui,-apple-system,"Segoe UI",Roboto,Tahoma,sans-serif'>Noto Kufi (العناوين)</option>
+              <option value='"IBM Plex Sans Arabic","Cairo","Tajawal","Noto Kufi Arabic",system-ui,-apple-system,"Segoe UI",Roboto,Tahoma,sans-serif'>IBM Plex (العناوين)</option>
+            </select>
+            <select id="fontBody">
+              <option value='"Noto Kufi Arabic","Cairo","Tajawal","IBM Plex Sans Arabic",system-ui,-apple-system,"Segoe UI",Roboto,Tahoma,sans-serif'>Noto Kufi (النص)</option>
+              <option value='"Cairo","Tajawal","Noto Kufi Arabic","IBM Plex Sans Arabic",system-ui,-apple-system,"Segoe UI",Roboto,Tahoma,sans-serif'>Cairo (النص)</option>
+              <option value='"Tajawal","Cairo","Noto Kufi Arabic","IBM Plex Sans Arabic",system-ui,-apple-system,"Segoe UI",Roboto,Tahoma,sans-serif'>Tajawal (النص)</option>
+              <option value='"IBM Plex Sans Arabic","Cairo","Tajawal","Noto Kufi Arabic",system-ui,-apple-system,"Segoe UI",Roboto,Tahoma,sans-serif'>IBM Plex (النص)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </details>
+
+    <div class="toolbar">
+      <div class="stack">
+        <button class="btn ghost" id="printBtn">طباعة</button>
+        <button class="btn ghost" id="pdfBtn">تصدير PDF</button>
+        <button class="btn" id="saveBtn">حفظ</button>
+        <button class="btn dan" id="resetBtn">إعادة ضبط</button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- المعاينة -->
+  <main class="preview">
+    <div class="a4" id="a4">
+      <div class="cv" id="cv">
+        <aside class="aside" id="asideCol">
+          <div class="row-top" id="row-top">
+            <div class="avatar" id="avatarWrap"><img id="p_photo" alt=""></div>
+            <div class="title-box">
+              <div class="name" id="p_name">اسمك هنا</div>
+              <div class="role" id="p_headline">مسمى مختصر</div>
+            </div>
+          </div>
+
+          <div class="section" id="sec-contact">
+            <h3><i class="fa-regular fa-address-card"></i> بيانات التواصل</h3>
+            <div class="kv">
+              <div>📍</div><div id="p_location">الرياض، السعودية</div>
+              <div>📞</div><div id="p_phone">05xxxxxxxx</div>
+              <div>✉️</div><div id="p_email">you@example.com</div>
+            </div>
+          </div>
+
+          <div class="section" id="sec-skills-aside">
+            <h3 id="skillsTitleAside"><i class="fa-solid fa-screwdriver-wrench"></i> مهارات & لغات</h3>
+            <div class="skill-grid" id="p_skills_aside"></div>
+          </div>
+
+          <div class="section" id="sec-hobbies-aside">
+            <h3 id="hobbiesTitle"><i class="fa-regular fa-face-smile"></i> الهوايات</h3>
+            <div class="skill-grid" id="p_hobbies_aside"></div>
+          </div>
+
+          <div class="section" id="sec-extras-aside">
+            <h3 id="extrasTitleAside"><i class="fa-regular fa-circle-check"></i> بيانات إضافية</h3>
+            <div class="kv" id="p_extras_aside"></div>
+          </div>
+        </aside>
+
+        <div class="divider" id="divider"></div>
+
+        <section class="main" id="mainCol">
+          <div class="section" id="sec-summary-main">
+            <span class="tag">الملخص الشخصي</span>
+            <div class="summary wrap" id="p_summary">اكتب ملخصًا قصيرًا ومهنيًا عن نفسك.</div>
+          </div>
+
+          <div class="section" id="sec-experience">
+            <span class="tag">الخبرات العملية</span>
+            <div class="exp-list" id="p_experience"></div>
+          </div>
+
+          <div class="section" id="sec-skills-main" style="display:none">
+            <span class="tag" id="skillsTagMain">مهارات & لغات</span>
+            <div class="skill-grid" id="p_skills_main"></div>
+          </div>
+
+          <div class="section" id="sec-extras-main" style="display:none">
+            <span class="tag" id="extrasTagMain">بيانات إضافية</span>
+            <div class="kv" id="p_extras_main"></div>
+          </div>
+
+          <div class="section" id="sec-edu">
+            <span class="tag">التعليم</span>
+            <div id="p_edu"></div>
+          </div>
+
+          <div class="section" id="sec-edu-aside-clone" style="display:none">
+            <h3>التعليم</h3>
+            <div id="p_edu_aside"></div>
+          </div>
+
+          <div class="section" id="sec-certs">
+            <span class="tag">الشهادات</span>
+            <div id="p_certs"></div>
+          </div>
+
+          <div class="section" id="sec-certs-aside-clone" style="display:none">
+            <h3>الشهادات</h3>
+            <div id="p_certs_aside"></div>
+          </div>
+
+          <div class="section" id="sec-hobbies-main" style="display:none">
+            <span class="tag" id="hobbiesTagMain">الهوايات</span>
+            <div class="skill-grid" id="p_hobbies_main"></div>
+          </div>
+        </section>
+      </div>
+      <div class="footer">تم الإنشاء عبر منشئ السيرة — نسخة عربية</div>
+    </div>
+  </main>
+
+  <!-- ✅ نافذة دفع اختيارية (لا تعيق التصدير) -->
+  <div id="pdfModal" class="modal hidden" aria-modal="true" role="dialog">
+    <div class="modal-content">
+      <p>نتمنى أنك استفدت من هذه الأداة ونفيدك أن قيمة النسخة الواحدة <strong>٩.٩٩ ريال</strong></p>
+      <div class="modal-actions">
+        <button class="btn ghost" id="closeModal">إغلاق</button>
+        <button class="btn" id="payBtn">دفع</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- مكتبات PDF -->
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  'use strict';
+  const $ = s => document.querySelector(s);
+
+  /* ================= الحالة ================= */
+  const state = {
+    v:{ photo:true, headline:true, contact:true, summary:true, skills:true, experience:true, edu:true, certs:true, hobbies:true, extras:true },
+    t:{ hobbies:true, skills:true, extras:true },
+    basic:{ name:"", headline:"", location:"", phone:"", email:"", summary:"" },
+    skills:[], edu:[], certs:[], hobbies:[], extras:[], experience:[],
+    place:{ skills:'aside', experience:'main', hobbies:'aside', extras:'aside', edu:'main', certs:'main', summary:'main' },
+    order:{
+      aside:['row-top','sec-contact','sec-skills-aside','sec-hobbies-aside','sec-extras-aside'],
+      main:['sec-summary-main','sec-experience','sec-skills-main','sec-extras-main','sec-edu','sec-certs']
+    },
+    layout:{ skills:'gauge', edu:'list', certs:'list', hobbies:'tags', exp:'cards' },
+    style:{
+      base:14, h:15, name:28,
+      text:"#111111", heading:"#0f172a",
+      gradA:"#0f172a", gradB:"#1d4ed8", gradAngle:180,
+      divider:true, dividerColor:"#e5e7eb", dividerW:1,
+      fontBody:getComputedStyle(document.documentElement).getPropertyValue('--font-body').trim(),
+      fontHead:getComputedStyle(document.documentElement).getPropertyValue('--font-head').trim(),
+      fontName:getComputedStyle(document.documentElement).getPropertyValue('--font-name').trim(),
+      gridMin:180, cardMinH:84, cardPad:12, sectionGap:18,
+      colMode:'two', asideW:280,
+      template:'classic',
+      langDir:'rtl'
+    }
+  };
+  const KEY='cv.builder.v4';
+
+  /* ================= أدوات ================= */
+  const uuid = () => crypto.randomUUID ? crypto.randomUUID() :
+    'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c=>{ const r=Math.random()*16|0, v=c==='x'?r:(r&0x3|0x8); return v.toString(16); });
+  const setVar = (name,val) => document.documentElement.style.setProperty(name,val);
+  const save = () => localStorage.setItem(KEY, JSON.stringify(state));
+  const load = () => { try{ const raw=localStorage.getItem(KEY); if(raw){ const s=JSON.parse(raw); mergeDeep(state,s); } }catch(e){} };
+  const mergeDeep = (t,s)=>{ for(const k in s){ if(s[k] && typeof s[k]==='object' && !Array.isArray(s[k])){ if(!t[k]) t[k]={}; mergeDeep(t[k],s[k]); } else { t[k]=s[k]; } } };
+
+  /* ================= أنماط/قوالب ================= */
+  const templates = {
+    classic: { gradA:'#0f172a', gradB:'#1d4ed8', heading:'#0f172a', text:'#111111' },
+    emerald: { gradA:'#064e3b', gradB:'#16a34a', heading:'#064e3b', text:'#111111' },
+    royal:   { gradA:'#3b0764', gradB:'#a855f7', heading:'#3b0764', text:'#111111' },
+    mono:    { gradA:'#111827', gradB:'#374151', heading:'#111827', text:'#111111' }
+  };
+
+  function applyStyle(){
+    setVar('--base-font', state.style.base+'px');
+    setVar('--h-font', state.style.h+'px');
+    setVar('--name-font', state.style.name+'px');
+    setVar('--text', state.style.text);
+    setVar('--heading', state.style.heading);
+    setVar('--aside-grad-a', state.style.gradA);
+    setVar('--aside-grad-b', state.style.gradB);
+    setVar('--aside-angle', state.style.gradAngle+'deg');
+    setVar('--divider-w', (state.style.divider ? state.style.dividerW : 0)+'px');
+    setVar('--divider', state.style.dividerColor);
+    setVar('--font-body', state.style.fontBody);
+    setVar('--font-head', state.style.fontHead);
+    setVar('--font-name', state.style.fontName);
+    setVar('--grid-min', state.style.gridMin+'px');
+    setVar('--card-min-h', state.style.cardMinH+'px');
+    setVar('--card-pad', state.style.cardPad+'px');
+    setVar('--section-gap', state.style.sectionGap+'px');
+    setVar('--aside-w', state.style.asideW+'px');
+
+    const divider = $('#divider'); if(divider) { divider.style.display = state.style.divider ? 'block':'none'; divider.style.background = state.style.dividerColor; }
+
+    // عمود واحد/اثنين
+    const cv = $('#cv'); if(cv) cv.classList.toggle('onecol', state.style.colMode==='one');
+
+    // اتجاه اللغة
+    document.documentElement.dir = state.style.langDir;
+    document.documentElement.lang = state.style.langDir==='rtl' ? 'ar' : 'en';
+  }
+
+  /* ================= رؤية الأقسام ================= */
+  function applyVisibility(){
+    const v = state.v, t = state.t;
+    $('#avatarWrap')?.classList.toggle('hidden', !v.photo);
+    $('#p_headline')?.classList.toggle('hidden', !v.headline);
+    $('#sec-contact')?.classList.toggle('hidden', !v.contact);
+
+    // Summary main/aside
+    const showSummMain = (state.place.summary==='main' && v.summary);
+    $('#sec-summary-main').style.display = showSummMain ? 'flex':'none';
+    let summaryAside = document.getElementById('sec-summary-aside');
+    if(state.place.summary==='aside' && v.summary){
+      if(!summaryAside){
+        summaryAside = document.createElement('div');
+        summaryAside.className='section'; summaryAside.id='sec-summary-aside';
+        summaryAside.innerHTML = `<h3>الملخص الشخصي</h3><div class="summary wrap" id="p_summary_aside"></div>`;
+        $('#asideCol')?.appendChild(summaryAside);
+      }
+      const sc = document.getElementById('p_summary_aside');
+      if(sc) sc.textContent = state.basic.summary || 'اكتب ملخصًا قصيرًا ومهنيًا عن نفسك.';
+    }else if(summaryAside){ summaryAside.remove(); }
+
+    // Experience place
+    const showExpMain = (state.place.experience==='main' && v.experience);
+    $('#sec-experience').style.display = showExpMain ? 'flex':'none';
+    let expAside = document.getElementById('sec-experience-aside');
+    if(state.place.experience==='aside' && v.experience){
+      if(!expAside){
+        expAside = document.createElement('div');
+        expAside.className='section'; expAside.id='sec-experience-aside';
+        expAside.innerHTML = `<h3>الخبرات العملية</h3><div id="p_experience_aside"></div>`;
+        $('#asideCol')?.appendChild(expAside);
+      }
+      const ea = document.getElementById('p_experience_aside');
+      if(ea) ea.innerHTML = $('#p_experience').innerHTML;
+    }else if(expAside){ expAside.remove(); }
+
+    // Skills
+    $('#sec-skills-aside').style.display = (state.place.skills==='aside' && v.skills) ? 'flex':'none';
+    $('#sec-skills-main').style.display  = (state.place.skills==='main'  && v.skills) ? 'flex':'none';
+    $('#skillsTitleAside').style.display = state.t.skills ? '' : 'none';
+    $('#skillsTagMain').style.display    = state.t.skills ? '' : 'none';
+
+    // Hobbies
+    $('#sec-hobbies-aside').style.display = (state.place.hobbies==='aside' && v.hobbies) ? 'flex':'none';
+    $('#sec-hobbies-main').style.display  = (state.place.hobbies==='main'  && v.hobbies) ? 'flex':'none';
+    $('#hobbiesTitle').style.display   = state.t.hobbies ? '' : 'none';
+    $('#hobbiesTagMain').style.display = state.t.hobbies ? '' : 'none';
+
+    // Extras
+    $('#sec-extras-aside').style.display = (state.place.extras==='aside' && v.extras) ? 'flex':'none';
+    $('#sec-extras-main').style.display  = (state.place.extras==='main'  && v.extras) ? 'flex':'none';
+    $('#extrasTitleAside').style.display = state.t.extras ? '' : 'none';
+    $('#extrasTagMain').style.display    = state.t.extras ? '' : 'none';
+
+    // Edu/Certs
+    $('#sec-edu').style.display = (state.place.edu==='main' && v.edu) ? 'flex':'none';
+    $('#sec-edu-aside-clone').style.display = (state.place.edu==='aside' && v.edu) ? 'flex':'none';
+    $('#sec-certs').style.display = (state.place.certs==='main' && v.certs) ? 'flex':'none';
+    $('#sec-certs-aside-clone').style.display = (state.place.certs==='aside' && v.certs) ? 'flex':'none';
+  }
+
+  /* ================= محتوى ================= */
+  function renderBasics(){
+    $('#p_name').textContent = state.basic.name || 'اسمك هنا';
+    $('#p_headline').textContent = state.basic.headline || 'مسمى مختصر';
+    $('#p_location').textContent = state.basic.location || 'الرياض، السعودية';
+    $('#p_phone').textContent = state.basic.phone || '05xxxxxxxx';
+    $('#p_email').textContent = state.basic.email || 'you@example.com';
+    $('#p_summary').textContent = state.basic.summary || 'اكتب ملخصًا قصيرًا ومهنيًا عن نفسك.';
+  }
+
+  // SVG Gauge
+  function gaugeSVG(level, ring){
+    const val = Math.max(0, Math.min(100, parseInt(level||0,10)));
+    const R = 26, C = 2*Math.PI*R, dash=(val/100)*C, gap=C-dash;
+    return `<div class="gauge"><svg viewBox="0 0 60 60" role="img">
+      <circle class="g-bg" cx="30" cy="30" r="${R}" stroke-width="8" fill="none"/>
+      <circle class="g-ring" cx="30" cy="30" r="${R}" stroke-width="8" fill="none" stroke="${ring}" stroke-dasharray="${dash} ${gap}"/>
+      <text class="g-center" x="30" y="30">${val}%</text>
+    </svg></div>`;
+  }
+
+  function starsHTML(level){
+    const v = Math.max(0, Math.min(5, Math.round((+level||0)/20)));
+    return `<div class="stars" aria-label="${v} stars">${
+      Array.from({length:5}).map((_,i)=> `<i class="fa-star ${i<v?'fa-solid':'fa-regular'}"></i>`).join('')
+    }</div>`;
+  }
+
+  function renderSkills(){
+    const html = state.skills.map(s=>{
+      if(s.type==='soft' || s.level==='' || s.level==null){
+        return `<div class="skill soft">
+          <div class="bullet"><i class="fa-solid fa-check"></i></div>
+          <div class="label wrap">${s.name}</div>
+        </div>`;
+      }
+      const level=Math.max(0,Math.min(100,parseInt(s.level,10)||0));
+      const ring=s.color||'#2563eb';
+      if(state.layout.skills==='bar'){
+        return `<div class="skill">
+          <div class="bar"><span style="width:${level}%; background:${ring}"></span></div>
+          <div>
+            <div class="label wrap">${s.name}</div>
+            <div class="sub">${level}%</div>
+          </div>
+        </div>`;
+      } else if(state.layout.skills==='stars'){
+        return `<div class="skill">
+          ${starsHTML(level)}
+          <div>
+            <div class="label wrap">${s.name}</div>
+            <div class="sub">${Math.round(level/20)}/5</div>
+          </div>
+        </div>`;
+      }
+      return `<div class="skill">
+        ${gaugeSVG(level, ring)}
+        <div>
+          <div class="label wrap">${s.name}</div>
+          <div class="sub">مستوى التمكن</div>
+        </div>
+      </div>`;
+    }).join('');
+    $('#p_skills_aside').innerHTML = html;
+    $('#p_skills_main').innerHTML  = html;
+  }
+
+  function renderExperience(){
+    const mkCard = e=>`
+      <div class="exp">
+        <div class="header">
+          <div>
+            <div class="title wrap">${e.role||''}</div>
+            <div class="company small wrap"><i class="fa-solid fa-building"></i> ${e.company||''}</div>
+          </div>
+          <div class="period"><i class="fa-regular fa-calendar"></i> ${(e.start||'')}${(e.end?' – '+e.end:'')}</div>
+        </div>
+        ${e.desc? `<div class="desc wrap">${e.desc}</div>`:''}
+      </div>`;
+    const mkTL = e=>`
+      <div class="t-item">
+        <div class="header" style="display:flex; justify-content:space-between; gap:8px">
+          <div class="title wrap">${e.role||''}</div>
+          <div class="period small"><i class="fa-regular fa-calendar"></i> ${(e.start||'')}${(e.end?' – '+e.end:'')}</div>
+        </div>
+        <div class="small company wrap"><i class="fa-solid fa-building"></i> ${e.company||''}</div>
+        ${e.desc? `<div class="desc wrap" style="margin-top:6px">${e.desc}</div>`:''}
+      </div>`;
+    const list = state.experience.map(state.layout.exp==='timeline'? mkTL : mkCard).join('');
+    if(state.layout.exp==='timeline'){
+      $('#p_experience').innerHTML = `<div class="timeline">${list}</div>`;
+    }else{
+      $('#p_experience').innerHTML = list;
+    }
+    const ea = document.getElementById('p_experience_aside');
+    if(ea) ea.innerHTML = $('#p_experience').innerHTML;
+  }
+
+  function renderEdu(){
+    const asCards = state.layout.edu==='cards';
+    if(asCards){
+      const html = `<div class="cards">` + state.edu.map(e=>`
+        <div class="card">
+          <div class="title wrap">${e.title}</div>
+          <div class="small wrap"><i class="fa-solid fa-school"></i> ${e.school||''}</div>
+          <div class="small"><i class="fa-regular fa-calendar"></i> ${e.year||''}</div>
+        </div>`).join('') + `</div>`;
+      $('#p_edu').innerHTML = html;
+      $('#p_edu_aside').innerHTML = html;
+    }else{
+      const html = state.edu.map(e=>`
+        <div class="edu">
+          <div>
+            <div style="font-weight:800" class="wrap">${e.title}</div>
+            <div class="small wrap"><i class="fa-solid fa-school"></i> ${e.school||''}</div>
+          </div>
+          <span class="small"><i class="fa-regular fa-calendar"></i> ${e.year||''}</span>
+        </div>`).join('');
+      $('#p_edu').innerHTML = html;
+      $('#p_edu_aside').innerHTML = html;
+    }
+  }
+  function renderCerts(){
+    const asCards = state.layout.certs==='cards';
+    if(asCards){
+      const html = `<div class="cards">` + state.certs.map(c=>`
+        <div class="card">
+          <div class="title wrap">${c.title}</div>
+          <div class="small wrap"><i class="fa-solid fa-building-columns"></i> ${c.issuer||''}</div>
+          <div class="small"><i class="fa-regular fa-calendar"></i> ${c.year||''}</div>
+        </div>`).join('') + `</div>`;
+      $('#p_certs').innerHTML = html;
+      $('#p_certs_aside').innerHTML = html;
+    }else{
+      const html = state.certs.map(c=>`
+        <div class="cert">
+          <div>
+            <div style="font-weight:800" class="wrap">${c.title}</div>
+            <div class="small wrap"><i class="fa-solid fa-building-columns"></i> ${c.issuer||''}</div>
+          </div>
+          <span class="small"><i class="fa-regular fa-calendar"></i> ${c.year||''}</span>
+        </div>`).join('');
+      $('#p_certs').innerHTML = html;
+      $('#p_certs_aside').innerHTML = html;
+    }
+  }
+  function renderHobbies(){
+    const pills = state.hobbies.map(h=> state.layout.hobbies==='list'
+      ? `<div class="wrap">• ${h.name}</div>`
+      : `<div class="skill soft"><div class="bullet"><i class="fa-regular fa-heart"></i></div><div class="label wrap">${h.name}</div></div>`
+    ).join('');
+    const targetAside = (state.layout.hobbies==='list') ? `<div class="wrap">${state.hobbies.map(h=>'• '+h.name).join('<br>')}</div>` : pills;
+    $('#p_hobbies_aside').innerHTML = targetAside;
+    $('#p_hobbies_main').innerHTML = pills;
+  }
+  function renderExtras(){
+    const aside = state.extras.filter(x=>x.where==='aside');
+    const main  = state.extras.filter(x=>x.where==='main');
+    $('#p_extras_aside').innerHTML = aside.map(x=>`<div class="wrap">${x.label}</div><div class="wrap">${x.value}</div>`).join('');
+    $('#p_extras_main').innerHTML  = main.map(x=>`<div class="wrap">${x.label}</div><div class="wrap">${x.value}</div>`).join('');
+  }
+
+  /* ================= ترتيب ================= */
+  function syncOrderArrays(){
+    const asideIds = ['row-top','sec-contact','sec-skills-aside','sec-hobbies-aside','sec-extras-aside','sec-experience-aside'];
+    const mainIds  = ['sec-summary-main','sec-experience','sec-skills-main','sec-extras-main','sec-edu','sec-certs'];
+    const exist = id => !!document.getElementById(id);
+    const fix = (current, canonical) => {
+      const cleaned = current.filter((id, i, arr)=> exist(id) && arr.indexOf(id)===i);
+      canonical.forEach(id=>{ if(exist(id) && !cleaned.includes(id)) cleaned.push(id); });
+      return cleaned;
+    };
+    state.order.aside = fix(state.order.aside, asideIds);
+    state.order.main  = fix(state.order.main,  mainIds);
+  }
+  function renderOrderControls(){
+    const mk = (ids, mount, side) => {
+      if(!mount) return;
+      const labelMap = {
+        'row-top':'الجزء العلوي (صورة+اسم)',
+        'sec-contact':'بيانات التواصل',
+        'sec-skills-aside':'المهارات (الجانب)',
+        'sec-hobbies-aside':'الهوايات (الجانب)',
+        'sec-extras-aside':'البيانات الإضافية (الجانب)',
+        'sec-experience-aside':'الخبرات (الجانب)',
+        'sec-summary-main':'الملخص (الرئيسي)',
+        'sec-experience':'الخبرات (الرئيسي)',
+        'sec-skills-main':'المهارات (الرئيسي)',
+        'sec-extras-main':'البيانات الإضافية (الرئيسي)',
+        'sec-edu':'التعليم',
+        'sec-certs':'الشهادات'
+      };
+      mount.innerHTML = ids.map(id=>`
+        <div class="chip">
+          <span>${labelMap[id]||id}</span>
+          <span>
+            <button class="btn ghost" data-move-side="${side}" data-move-id="${id}" data-dir="-1">▲</button>
+            <button class="btn ghost" data-move-side="${side}" data-move-id="${id}" data-dir="1">▼</button>
+          </span>
+        </div>`).join('');
+    };
+    mk(state.order.aside, $('#order-aside'), 'aside');
+    mk(state.order.main,  $('#order-main'),  'main');
+  }
+  function applyOrders(){
+    const placeNodes = (wrapper, orderArr) => { if(!wrapper) return; orderArr.forEach(id=>{ const n=document.getElementById(id); if(n) wrapper.appendChild(n); }); };
+    applyVisibility(); // تأكد من إنشاء الاستنساخ
+    placeNodes($('#asideCol'), state.order.aside);
+    placeNodes($('#mainCol'),  state.order.main);
+  }
+
+  /* ================= قوائم إدارة العناصر ================= */
+  function renderLists(){
+    const set = (sel, html) => { const el=$(sel); if(el) el.innerHTML = html; };
+    set('#skillList', state.skills.map(s=>`
+      <div class="chip">
+        <span class="wrap">${s.name}${(s.type==='soft' || s.level==='' || s.level==null)?'':' — '+(s.level||0)+'%'}</span>
+        <button class="btn dan" data-skill-del="${s.id}">حذف</button>
+      </div>`).join(''));
+    set('#eduList', state.edu.map(e=>`
+      <div class="chip">
+        <span class="wrap">${e.title} — ${e.school||''} ${e.year? '('+e.year+')':''}</span>
+        <button class="btn dan" data-edu-del="${e.id}">حذف</button>
+      </div>`).join(''));
+    set('#certList', state.certs.map(c=>`
+      <div class="chip">
+        <span class="wrap">${c.title} — ${c.issuer||''} ${c.year? '('+c.year+')':''}</span>
+        <button class="btn dan" data-cert-del="${c.id}">حذف</button>
+      </div>`).join(''));
+    set('#hobbyList', state.hobbies.map(h=>`
+      <div class="chip">
+        <span class="wrap">${h.name}</span>
+        <button class="btn dan" data-hobby-del="${h.id}">حذف</button>
+      </div>`).join(''));
+    set('#extraList', state.extras.map(x=>`
+      <div class="chip">
+        <span class="wrap">${x.label} — ${x.value} (${x.where==='aside'?'جانب':'رئيسي'})</span>
+        <button class="btn dan" data-extra-del="${x.id}">حذف</button>
+      </div>`).join(''));
+    set('#expList', state.experience.map(x=>`
+      <div class="chip">
+        <span class="wrap">${x.role} — ${x.company||''} ${x.start? '('+x.start+(x.end?'–'+x.end:'')+')':''}</span>
+        <button class="btn dan" data-exp-del="${x.id}">حذف</button>
+      </div>`).join(''));
+  }
+
+  /* ================= رندر شامل ================= */
+  function renderAll(){
+    applyStyle();
+    renderBasics();
+    renderSkills();
+    renderExperience();
+    renderEdu();
+    renderCerts();
+    renderHobbies();
+    renderExtras();
+    applyVisibility();
+    syncOrderArrays();
+    applyOrders();
+    renderOrderControls();
+    renderLists();
+  }
+
+  /* ================= تحميل/حفظ ================= */
+  function syncControlsFromState(){
+    // رؤية
+    Object.keys(state.v).forEach(k=>{ const cb=$('#v_'+k); if(cb) cb.checked = !!state.v[k]; });
+    Object.keys(state.t).forEach(k=>{ const cb=$('#t_'+k); if(cb) cb.checked = !!state.t[k]; });
+
+    // بيانات
+    ['name','headline','location','phone','email','summary'].forEach(id=>{ const el=$('#'+id); if(el) el.value = state.basic[id]||''; });
+
+    // أماكن
+    $('#place-skills').value = state.place.skills;
+    $('#place-experience').value = state.place.experience;
+    $('#place-hobbies').value = state.place.hobbies;
+    $('#place-extras').value = state.place.extras;
+    $('#place-edu').value = state.place.edu;
+    $('#place-certs').value = state.place.certs;
+    $('#place-summary').value = state.place.summary;
+
+    // تخطيطات
+    $('#skillsLayout').value = state.layout.skills;
+    $('#eduLayout').value = state.layout.edu;
+    $('#certLayout').value = state.layout.certs;
+    $('#hobbyLayout').value = state.layout.hobbies;
+    $('#expLayout').value = state.layout.exp;
+
+    // قوالب/لغة/أعمدة
+    $('#templatePick').value = state.style.template;
+    $('#langDir').value = state.style.langDir;
+    $('#colMode').value = state.style.colMode;
+    $('#asideW').value = state.style.asideW; $('#asideW_v').textContent = state.style.asideW+'px';
+
+    // أحجام/ألوان
+    const setVal=(id,val,disp,suffix='')=>{ const el=$('#'+id); if(el) el.value=val; if(disp) $('#'+disp).textContent=val+suffix; };
+    setVal('baseSize', state.style.base, 'baseSize_v','px');
+    setVal('hSize', state.style.h, 'hSize_v','px');
+    setVal('nameSize', state.style.name, 'nameSize_v','px');
+    setVal('gridMin', state.style.gridMin, 'gridMin_v','px');
+    setVal('cardMinH', state.style.cardMinH, 'cardMinH_v','px');
+    setVal('cardPad', state.style.cardPad, 'cardPad_v','px');
+    setVal('sectionGap', state.style.sectionGap, 'sectionGap_v','px');
+    $('#colText').value = state.style.text;
+    $('#colHeading').value = state.style.heading;
+    $('#gradA').value = state.style.gradA; $('#gradB').value = state.style.gradB;
+    $('#gradAngle').value = state.style.gradAngle; $('#gradAngle_v').textContent = state.style.gradAngle+'°';
+    $('#dividerToggle').checked = !!state.style.divider;
+    $('#dividerColor').value = state.style.dividerColor;
+    $('#dividerW').value = state.style.dividerW; $('#dividerW_v').textContent=state.style.dividerW+'px';
+
+    // خطوط
+    $('#fontBody').value = state.style.fontBody;
+    $('#fontHead').value = state.style.fontHead;
+    $('#fontName').value = state.style.fontName;
+
+    renderLists();
+  }
+
+  /* ================= أحداث ================= */
+  function bindEvents(){
+    // القالب
+    $('#templatePick').addEventListener('change', e=>{
+      const t=e.target.value; state.style.template=t;
+      const m = templates[t];
+      if(m){
+        state.style.gradA = m.gradA; state.style.gradB = m.gradB;
+        state.style.heading = m.heading; state.style.text = m.text;
+      }
+      renderAll(); save();
+    });
+
+    // اللغة/الاتجاه
+    $('#langDir').addEventListener('change', e=>{
+      state.style.langDir = e.target.value;
+      renderAll(); save();
+    });
+
+    // الأعمدة
+    $('#colMode').addEventListener('change', e=>{
+      state.style.colMode = e.target.value;
+      renderAll(); save();
+    });
+    $('#asideW').addEventListener('input', e=>{
+      state.style.asideW = +e.target.value; $('#asideW_v').textContent = e.target.value+'px'; applyStyle(); save();
+    });
+
+    // رؤية العناوين/الأقسام
+    Object.keys(state.v).forEach(k=>{
+      $('#v_'+k).addEventListener('change', e=>{ state.v[k]=e.target.checked; renderAll(); save(); });
+    });
+    Object.keys(state.t).forEach(k=>{
+      $('#t_'+k).addEventListener('change', e=>{ state.t[k]=e.target.checked; renderAll(); save(); });
+    });
+
+    // بيانات
+    ['name','headline','location','phone','email','summary'].forEach(id=>{
+      $('#'+id).addEventListener('input', e=>{ state.basic[id]=e.target.value; renderAll(); save(); });
+    });
+    $('#photo').addEventListener('change', e=>{
+      const f=e.target.files?.[0]; if(!f) return;
+      const r=new FileReader(); r.onload=ev=>{ $('#p_photo').src = ev.target.result; }; r.readAsDataURL(f);
+    });
+
+    // إضافة عناصر
+    $('#addSkill').addEventListener('click', ()=>{
+      const name=$('#skill-name').value.trim(); if(!name) return alert('أدخل اسم المهارة');
+      const levelRaw=$('#skill-level').value.trim();
+      const color=$('#skill-color').value||'#2563eb';
+      const soft=$('#skill-soft').checked || levelRaw==='';
+
+      if(soft){
+        state.skills.push({id:uuid(), name, type:'soft'});
+      }else{
+        const level=Math.max(0,Math.min(100,parseInt(levelRaw,10)||0));
+        state.skills.push({id:uuid(), name, level, color});
+      }
+      ['#skill-name','#skill-level'].forEach(s=>{ const el=$(s); el.value=''; });
+      $('#skill-soft').checked=false;
+      renderAll(); save();
+    });
+    $('#addEdu').addEventListener('click', ()=>{
+      const title=$('#edu-title').value.trim(); if(!title) return alert('أدخل المؤهل');
+      const school=$('#edu-school').value.trim()||''; const year=$('#edu-year').value.trim()||'';
+      state.edu.push({id:uuid(), title, school, year});
+      ['#edu-title','#edu-school','#edu-year'].forEach(s=>$(s).value='');
+      renderAll(); save();
+    });
+    $('#addCert').addEventListener('click', ()=>{
+      const title=$('#cert-title').value.trim(); if(!title) return alert('أدخل اسم الشهادة');
+      const issuer=$('#cert-issuer').value.trim()||''; const year=$('#cert-year').value.trim()||'';
+      state.certs.push({id:uuid(), title, issuer, year});
+      ['#cert-title','#cert-issuer','#cert-year'].forEach(s=>$(s).value='');
+      renderAll(); save();
+    });
+    $('#addHobby').addEventListener('click', ()=>{
+      const v=$('#hobby-input').value.trim(); if(!v) return;
+      state.hobbies.push({id:uuid(), name:v}); $('#hobby-input').value='';
+      renderAll(); save();
+    });
+    $('#addExtra').addEventListener('click', ()=>{
+      const label=$('#extra-label').value.trim(); if(!label) return alert('أدخل التسمية');
+      const value=$('#extra-value').value.trim()||''; const where=$('#extra-where').value;
+      state.extras.push({id:uuid(), label, value, where});
+      ['#extra-label','#extra-value'].forEach(s=>$(s).value='');
+      renderAll(); save();
+    });
+    $('#addExp').addEventListener('click', ()=>{
+      const role=$('#exp-role').value.trim(); if(!role) return alert('أدخل المسمّى الوظيفي');
+      const company=$('#exp-company').value.trim()||''; const start=$('#exp-start').value.trim()||''; const end=$('#exp-end').value.trim()||''; const desc=$('#exp-desc').value.trim()||'';
+      state.experience.push({id:uuid(), role, company, start, end, desc});
+      ['#exp-role','#exp-company','#exp-start','#exp-end','#exp-desc'].forEach(s=>$(s).value='');
+      renderAll(); save();
+    });
+
+    // حذف + ترتيب
+    document.body.addEventListener('click', (e)=>{
+      const t=e.target;
+      if(!(t instanceof HTMLElement)) return;
+
+      const del=(attr,key)=>{
+        const id=t.getAttribute(attr); if(!id) return false;
+        state[key]=state[key].filter(x=>x.id!==id); renderAll(); save(); return true;
+      };
+      if(del('data-skill-del','skills')) return;
+      if(del('data-edu-del','edu')) return;
+      if(del('data-cert-del','certs')) return;
+      if(del('data-hobby-del','hobbies')) return;
+      if(del('data-exp-del','experience')) return;
+      if(del('data-extra-del','extras')) return;
+
+      const side=t.getAttribute('data-move-side');
+      const id=t.getAttribute('data-move-id');
+      const dir=parseInt(t.getAttribute('data-dir')||'0',10);
+      if(side && id && dir){
+        const arr = side==='aside'? state.order.aside : state.order.main;
+        const idx = arr.indexOf(id);
+        if(idx>-1){
+          const j=Math.max(0,Math.min(arr.length-1,idx+dir));
+          if(j!==idx){ const [it]=arr.splice(idx,1); arr.splice(j,0,it); }
+          applyOrders(); renderOrderControls(); save();
+        }
+      }
+    });
+
+    // خيارات عرض
+    $('#skillsLayout').addEventListener('change', e=>{ state.layout.skills=e.target.value; renderAll(); save(); });
+    $('#eduLayout').addEventListener('change', e=>{ state.layout.edu=e.target.value; renderAll(); save(); });
+    $('#certLayout').addEventListener('change', e=>{ state.layout.certs=e.target.value; renderAll(); save(); });
+    $('#hobbyLayout').addEventListener('change', e=>{ state.layout.hobbies=e.target.value; renderAll(); save(); });
+    $('#expLayout').addEventListener('change', e=>{ state.layout.exp=e.target.value; renderAll(); save(); });
+
+    // أماكن الأقسام
+    [
+      ['place-skills','skills'],['place-experience','experience'],['place-hobbies','hobbies'],
+      ['place-extras','extras'],['place-edu','edu'],['place-certs','certs'],['place-summary','summary']
+    ].forEach(([sel,key])=>{
+      $('#'+sel).addEventListener('change', e=>{ state.place[key]=e.target.value; renderAll(); save(); });
+    });
+
+    // أحجام
+    const bindRange=(id,key,disp,suffix)=>$('#'+id).addEventListener('input', e=>{ state.style[key]=+e.target.value; $('#'+disp).textContent=e.target.value+suffix; applyStyle(); save(); });
+    bindRange('baseSize','base','baseSize_v','px');
+    bindRange('hSize','h','hSize_v','px');
+    bindRange('nameSize','name','nameSize_v','px');
+    bindRange('gridMin','gridMin','gridMin_v','px');
+    bindRange('cardMinH','cardMinH','cardMinH_v','px');
+    bindRange('cardPad','cardPad','cardPad_v','px');
+    bindRange('sectionGap','sectionGap','sectionGap_v','px');
+
+    // ألوان
+    const bindColor=(id,key)=>$('#'+id).addEventListener('input', e=>{ state.style[key]=e.target.value; applyStyle(); save(); });
+    ['colText','colHeading','gradA','gradB'].forEach((id,i)=>{
+      const key = id==='colText'?'text': id==='colHeading'?'heading': id==='gradA'?'gradA':'gradB';
+      bindColor(id,key);
+    });
+    $('#gradAngle').addEventListener('input', e=>{ state.style.gradAngle=+e.target.value; $('#gradAngle_v').textContent = e.target.value+'°'; applyStyle(); save(); });
+
+    // فاصل
+    $('#dividerToggle').addEventListener('change', e=>{ state.style.divider=e.target.checked; applyStyle(); save(); });
+    $('#dividerColor').addEventListener('input', e=>{ state.style.dividerColor=e.target.value; applyStyle(); save(); });
+    $('#dividerW').addEventListener('input', e=>{ state.style.dividerW=+e.target.value; $('#dividerW_v').textContent=e.target.value+'px'; applyStyle(); save(); });
+
+    // خطوط
+    $('#fontBody').addEventListener('change', e=>{ state.style.fontBody=e.target.value; applyStyle(); save(); });
+    $('#fontHead').addEventListener('change', e=>{ state.style.fontHead=e.target.value; applyStyle(); save(); });
+    $('#fontName').addEventListener('change', e=>{ state.style.fontName=e.target.value; applyStyle(); save(); });
+
+    // طباعة
+    $('#printBtn').addEventListener('click', ()=>window.print());
+
+    // ✅ تصدير PDF: يبدأ فورًا ثم يظهر التنبيه (غير معيق)
+    $('#pdfBtn').addEventListener('click', async ()=>{
+      try{
+        await exportPDF();
+      } finally {
+        const m = $('#pdfModal');
+        if(m) m.classList.remove('hidden');
+      }
+    });
+
+    // ✅ أزرار نافذة الدفع
+    $('#closeModal')?.addEventListener('click', ()=> $('#pdfModal').classList.add('hidden'));
+    $('#payBtn')?.addEventListener('click', ()=> { window.location.href = "https://hex-store.com"; });
+
+    // حفظ/إعادة ضبط
+    $('#saveBtn').addEventListener('click', ()=>{ save(); alert('تم الحفظ ✅'); });
+    $('#resetBtn').addEventListener('click', ()=>{ if(confirm('إعادة ضبط كل شيء؟')){ localStorage.removeItem(KEY); location.reload(); } });
+  }
+
+  /* ================= PDF متعدد الصفحات ================= */
+  async function exportPDF(){
+    const a4 = $('#a4');
+    const footer=$('.footer'); const old=footer?.style.display||'';
+    if(footer) footer.style.display='none';
+
+    const canvas = await html2canvas(a4, {
+      scale: 2,
+      backgroundColor: '#ffffff',
+      useCORS: true,
+      allowTaint: true,
+      windowWidth: a4.scrollWidth,
+      windowHeight: a4.scrollHeight
+    });
+
+    const imgData = canvas.toDataURL('image/jpeg', 0.95);
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({ orientation:'p', unit:'pt', format:'a4' });
+
+    const pageW = pdf.internal.pageSize.getWidth();
+    const pageH = pdf.internal.pageSize.getHeight();
+
+    const imgW = pageW;
+    const imgH = canvas.height * (imgW / canvas.width);
+
+    let heightLeft = imgH;
+    let position = 0;
+
+    pdf.addImage(imgData, 'JPEG', 0, position, imgW, imgH);
+    heightLeft -= pageH;
+
+    while (heightLeft > 0) {
+      position -= pageH;
+      pdf.addPage();
+      pdf.addImage(imgData, 'JPEG', 0, position, imgW, imgH);
+      heightLeft -= pageH;
+    }
+
+    pdf.save('سيرتي-الذاتية.pdf');
+    if(footer) footer.style.display=old;
+  }
+
+  /* ================= تشغيل ================= */
+  load();
+  syncControlsFromState();
+  bindEvents();
+  renderAll();
+});
+</script>
+</body>
+</html>
